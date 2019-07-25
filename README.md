@@ -40,3 +40,13 @@ moz.urlMetrics
 
 
 ```
+
+## Compatibility
+
+## Resources
+
+* [Moz Links Api Documentation](https://moz.com/help/links-api)
+
+## License
+
+MIT 
