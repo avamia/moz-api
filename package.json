@@ -4,7 +4,8 @@
   "description": "A lightweight javascript API wrapper for the Moz API",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha",
+    "lint": "eslint ./lib",
   },
   "repository": {
     "type": "git",
@@ -12,6 +13,7 @@
   },
   "keywords": [
     "moz",
+    "api",
     "backlinks",
     "moz api",
     "seo",
@@ -26,6 +28,7 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "crypto": "^1.0.1",
+    "eslint": "^6.1.0",
     "mocha": "^6.2.0"
   },
   "dependencies": {
