@@ -1,6 +1,6 @@
 {
   "name": "moz-api",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A lightweight javascript API wrapper for the Moz API",
   "main": "index.js",
   "scripts": {
