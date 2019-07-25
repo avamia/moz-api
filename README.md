@@ -43,10 +43,17 @@ moz.urlMetrics
 
 ## Compatibility
 
+## Depedencies
+
+* [Axios]()
+
 ## Resources
 
-* [Moz Links Api Documentation](https://moz.com/help/links-api)
+* [Moz Links Api Documentation][api-docs]
 
 ## License
 
-MIT 
+This library is licensed under MIT. See [LICENSE][license].
+
+[api-docs]: https://moz.com/help/links-api
+[license]: https://github.com/avamia-dm/moz-api/blob/master/LICENSE

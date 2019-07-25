@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha",
-    "lint": "eslint ./lib",
+    "lint": "eslint ./lib"
   },
   "repository": {
     "type": "git",
@@ -29,6 +29,7 @@
     "chai": "^4.2.0",
     "crypto": "^1.0.1",
     "eslint": "^6.1.0",
+    "eslint-config-airbnb": "^17.1.1",
     "mocha": "^6.2.0"
   },
   "dependencies": {
