@@ -5,13 +5,9 @@ var Moz = require('../lib/Moz');
 var Signature = require('../lib/signature');
 var MozEndpoint = require('../lib/moz-endpoint');
 
-var fs = require('fs');
-
-var conf = JSON.parse(fs.readFileSync('test/test-config.json', 'utf8'));
-
 const credentials = {
-  accessId: conf.credentials.accessId,
-  secretKey: conf.credentials.secretKey 
+  accessId: process.env.ACCESS_ID,
+  secretKey: process.env.SECRET_KEY
 }
 
 describe('Moz', () => {
