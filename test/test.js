@@ -21,7 +21,7 @@ describe('Moz', () => {
     })
 
     it('throws error without credentials', () => {
-      
+      expect(new Moz()).to.throw();
     }) 
   })
 })
