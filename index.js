@@ -1,1 +1,1 @@
-module.exports = require('./lib/moz');
+module.exports = require('./lib/Moz');

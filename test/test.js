@@ -1,7 +1,7 @@
 'use strict';
 
 var expect = require('chai').expect;
-var Moz = require('../lib/moz');
+var Moz = require('../lib/Moz');
 var Signature = require('../lib/signature');
 var MozEndpoint = require('../lib/moz-endpoint');
 
