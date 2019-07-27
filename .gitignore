@@ -62,3 +62,5 @@ typings/
 
 # env
 test/test-config.json
+
+.DS_Store
