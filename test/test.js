@@ -405,4 +405,52 @@ describe('MozEndpoint', () => {
     })
   })
 
+  describe("_validateColType", () => {
+    var mozEndpoint = new MozEndpoint(moz);
+
+    it('validates col type correctly', () => {
+      expect(mozEndpoint._validateColType(['Title', 'Canonical URL'], 'url-metrics')).to.equal(true);
+      expect(mozEndpoint._validateColType(['External MozRank Passed'], 'anchor-text')).to.equal(true);
+    });
+
+    it('does nothing with no cols provided', () => {
+      expect(mozEndpoint._validateColType(null, 'url-metrics')).to.equal(undefined);  
+      expect(mozEndpoint._validateColType()).to.equal(undefined);  
+    })
+
+    it('throws error with wrong param type passed', () => {
+      expect(function() { mozEndpoint._validateColType('Title', 'url-metrics') }).to.throw(TypeError, 'Wrong datatype provided.')
+    })
+
+    it('throws error with bit flag metric', () => {
+      expect(function() { mozEndpoint._validateColType(['Title'], 'anchor-text')}).to.throw(Error, 'Invalid Bit Flag: Title')
+    })
+
+    it('warns with deprecated bit flag', () => {
+      expect(mozEndpoint._validateColType(['MozRank: URL'], 'url-metrics')).to.equal(true)
+    })
+  })
+
+  describe('_validateCols', () => {
+    var mozEndpoint = new MozEndpoint(moz);
+    var bitFlagMapping = {
+      cols: 'url-metrics',
+      sourceCols: 'url-metrics',
+      targetCols: 'url-metrics',
+      linkCols: 'url-metrics'
+    } 
+
+    it('validates cols correctly', () => {
+      var params = {
+        cols: ['Title', 'Domain Authority'],
+        sourceCols: ['External links', 'Title'],
+        linkCols: ['Title',  'Canonical URL', 'Subdomain, Subdomains Linking']
+      }
+
+      expect(mozEndpoint._validateCols(params, bitFlagMapping)).to.equal(true);
+    })
+  })
+
+  
+
 });
