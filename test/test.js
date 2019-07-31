@@ -448,9 +448,111 @@ describe('MozEndpoint', () => {
       }
 
       expect(mozEndpoint._validateCols(params, bitFlagMapping)).to.equal(true);
+    });
+  })
+
+  describe('_validateFieldInArray', () => {
+    var mozEndpoint = new MozEndpoint(moz);
+    var sorting = ['page_authority', 'domains_linking_page'];
+    var filters = ['external', 'follow', 'nofollow', 'nonequity', 'equity', 'rel_canonical', '301', '302'];
+
+    it('validates array correctly', () => {
+      expect(mozEndpoint._validateFieldInArray('page_authority', sorting, 'sorting')).to.equal(true);
+      expect(mozEndpoint._validateFieldInArray('follow', filters, 'filters')).to.equal(true)
+    })
+
+    it('does nothing with empty params', () => {
+      expect(mozEndpoint._validateFieldInArray(null, filters, 'filters')).to.equal(undefined);
+    })
+
+    it('throws without array', () => {
+      expect(function() {
+        mozEndpoint._validateFieldInArray('follow', null, 'filters')
+      }).to.throw(Error, 'No field found on prototype for filters')
+    })
+
+    it('throw error with incorrect type', () => {
+      expect(function() {
+        mozEndpoint._validateFieldInArray('follow', 'follow', 'filters')
+      }).to.throw(TypeError, 'Incorrect datatype for filters')
+    })
+
+    it('throw error with incorrect type', () => {
+      expect(function() {
+        mozEndpoint._validateFieldInArray(['follow'], filters, 'filters')
+      }).to.throw(TypeError, 'Incorrect datatype for filters')
+    })
+
+    it('throws error with incorrect field provided', () => {
+      expect(function() {
+        mozEndpoint._validateFieldInArray('nofollow', sorting, 'filters')
+      }).to.throw(Error, 'nofollow not found in filters.')
+    })
+  });
+
+  describe('_validatePresence', () => {
+    var mozEndpoint = new MozEndpoint(moz);
+
+    it('validates correctly', () => {
+      expect(mozEndpoint._validatePresence('moz.com', 'target')).to.equal(true)
+    })
+
+    it('throws without value present', () => {
+      expect(function() {
+        mozEndpoint._validatePresence(null, 'target')
+      }).to.throw(Error, 'target not present!')
+
+      expect(function() {
+        mozEndpoint._validatePresence(undefined, 'target')
+      }).to.throw(Error, 'target not present!')
     })
   })
 
-  
+  describe('_validateParams', () => {
+    var mozEndpoint = new MozEndpoint(moz);
+    var acceptedParams = {
+      scope: null,
+      filter: null,
+      cols: null,
+      sourceCols: null,
+      limit: 25,
+      offset: 0
+    }
+
+    it('validates correclty', () => {
+      var params = {
+        cols: ['Target'],
+        limit: 50
+      }
+
+      expect(mozEndpoint._validateParams(params, acceptedParams)).to.equal(true)
+    })
+
+    it('throws with unrecognized param', () => {
+      var params = {
+        linkCols: ['Subdomain'],
+        limit: 35
+      }
+
+      expect(function() {
+        mozEndpoint._validateParams(params, acceptedParams)
+      }).to.throw(Error, 'Unrecognized parameter')
+    })
+  })
+
+  describe('_encodeUrl', () => {
+    var mozEndpoint = new MozEndpoint(moz);
+
+    it('encodes url', () => {
+      var url = 'https://news.ycombinator.com/news'
+
+      expect(mozEndpoint._encodeUrl(url)).to.equal('https%3A%2F%2Fnews.ycombinator.com%2Fnews')
+    })
+
+    it('returns blank string without param', () => {
+      var url = null;
+      expect(mozEndpoint._encodeUrl(url)).to.equal('')
+    });
+  })
 
 });
