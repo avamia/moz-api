@@ -5,6 +5,8 @@ var Moz = require('../lib/Moz');
 var Signature = require('../lib/signature');
 var MozEndpoint = require('../lib/moz-endpoint');
 var utils = require('../lib/utils');
+var tk = require('timekeeper');
+var crypto = require('crypto');
 
 const credentials = {
   accessId: process.env.ACCESS_ID,
@@ -553,6 +555,153 @@ describe('MozEndpoint', () => {
       var url = null;
       expect(mozEndpoint._encodeUrl(url)).to.equal('')
     });
+  })
+
+  describe('_appendUrlParams', () => {
+    var mozEndpoint = new MozEndpoint(moz);
+
+    it('creates url params', () => {
+      expect(mozEndpoint._appendUrlParams('sourceCols', 5)).to.equal('SourceCols=5&');
+    });
+
+    it('creates url params without ampersand', () => {
+      expect(mozEndpoint._appendUrlParams('sourceDomain', 'moz.com', false)).to.equal('SourceDomain=moz.com')
+    });
+  })
+
+  describe('_signedAuthParams', () => {
+    var mozEndpoint = new MozEndpoint(moz);
+
+    it('generates auth url params', () => {
+      var time = new Date(1330688329321);
+      tk.freeze(time);
+
+      var expires = Math.floor((Date.now() / 1000)) + 300;
+      var stringToSign = credentials.accessId + '\n' + expires;
+      var signature = crypto.createHmac('sha1', credentials.secretKey).update(stringToSign).digest('base64');
+
+      var expectedUrl = 'AccessID=' + credentials.accessId + '&';
+      expectedUrl += 'Expires=' + expires + '&'; 
+      expectedUrl += 'Signature=' + encodeURIComponent(signature);
+
+      expect(mozEndpoint._signedAuthParams()).to.equal(expectedUrl)
+
+      tk.reset();
+    });
+  });
+
+  describe('_buildEndPoint', () => {
+    var mozEndpoint = new MozEndpoint(moz);
+
+    it('generates a correct uri for endpoint', () => {
+      mozEndpoint.endpoint = 'url-metrics';
+
+      expect(mozEndpoint._buildEndpoint()).to.equal('http://lsapi.seomoz.com/linkscape/url-metrics/');
+    })
+  })
+
+  describe('_buildCol', () => {
+    var mozEndpoint = new MozEndpoint(moz);
+
+    it('correctly builds column bitmask', () => {
+      expect(mozEndpoint._buildCol(['Title', 'Subdomain', 'Links'], 'url-metrics')).to.equal(2057)
+    });
+  });
+
+  describe('_buildFilter', () => {
+    var mozEndpoint = new MozEndpoint(moz);
+
+    it('builds filter string', () => {
+      expect(mozEndpoint._buildFilter(['all', 'status302', 'status5xx'])).to.equal('all+status302+status5xx')
+    });
+
+    it('passes string through', () => {
+      expect(mozEndpoint._buildFilter('all')).to.equal('all')
+    })
+  })
+
+  describe('_queryParams', () => {
+    var mozEndpoint = new MozEndpoint(moz);
+
+    it('correctly converts params to url params', () => {
+      mozEndpoint.bitFlagsMapping = {
+        sourceCols: 'url-metrics',
+        targetCols: 'url-metrics',
+        linkCols: 'links'
+      };
+
+      var params = {
+        sourceCols: ['Title', 'Domain Authority'],
+        scope: 'page_to_page',
+        sorting: 'page_authority',
+        filter: 'external',
+        sourceDomain: 'https://moz.com',
+        limit: 50,
+      }
+
+      expect(mozEndpoint._queryParams(params)).to.equal('SourceCols=68719476737&Scope=page_to_page&Sorting=page_authority&Filter=external&SourceDomain=https%3A%2F%2Fmoz.com&Limit=50')
+    });
+
+    it('correctly converts params to url params', () => {
+      mozEndpoint.bitFlagsMapping = {
+        cols: 'url-metrics',
+        sourceCols: 'url-metrics',
+        targetCols: 'url-metrics',
+        linkCols: 'url-metrics'
+      };
+
+      var params = {
+        cols: ['Title'],
+        offset: 1,
+        limit: 20,
+      };
+
+      expect(mozEndpoint._queryParams(params)).to.equal('Cols=1&Offset=1&Limit=20')
+    });
+
+    it('passes through undefined param', () => {
+      var params = {
+        col: 'Title'
+      }
+
+      expect(mozEndpoint._queryParams(params)).to.equal('')
+    })
+  })
+
+  describe('_buildUrlWithTarget', () => {
+    var mozEndpoint = new MozEndpoint(moz);
+
+    it('correctly constructs target url', () => {
+      mozEndpoint.endpoint = 'url-metrics';
+      mozEndpoint.bitFlagsMapping = {
+        cols: 'url-metrics',
+        sourceCols: 'url-metrics',
+        targetCols: 'url-metrics',
+        linkCols: 'url-metrics'
+      };
+
+      var params = {
+        cols: ['Title', 'Domain Authority'],
+        limit: 35
+      }
+
+      var time = new Date(1330688329321);
+      tk.freeze(time);
+
+      var expectedUrl = 'http://lsapi.seomoz.com/linkscape/url-metrics/google.com?Cols=68719476737&Limit=35&';
+
+      var expires = Math.floor((Date.now() / 1000)) + 300;
+      var stringToSign = credentials.accessId + '\n' + expires;
+      var signature = crypto.createHmac('sha1', credentials.secretKey).update(stringToSign).digest('base64');
+
+      expectedUrl += 'AccessID=' + credentials.accessId + '&';
+      expectedUrl += 'Expires=' + expires + '&'; 
+      expectedUrl += 'Signature=' + encodeURIComponent(signature);
+
+      expect(mozEndpoint._buildUrlWithTarget('google.com', params)).to.equal(expectedUrl)
+
+      tk.reset();
+    }) 
   })
 
 });
