@@ -1,12 +1,18 @@
 'use strict';
 
-var expect = require('chai').expect;
+var chai = require('chai');
+var chaiAsPromised = require("chai-as-promised");
+
 var Moz = require('../lib/Moz');
 var Signature = require('../lib/signature');
 var MozEndpoint = require('../lib/moz-endpoint');
 var utils = require('../lib/utils');
 var tk = require('timekeeper');
 var crypto = require('crypto');
+
+chai.use(chaiAsPromised);
+
+var expect = chai.expect;
 
 const credentials = {
   accessId: process.env.ACCESS_ID,
@@ -701,7 +707,83 @@ describe('MozEndpoint', () => {
       expect(mozEndpoint._buildUrlWithTarget('google.com', params)).to.equal(expectedUrl)
 
       tk.reset();
-    }) 
+    });
+  })
+
+  describe('_buildUrl', () => {
+    var mozEndpoint = new MozEndpoint(moz);
+
+    it('correctly constructs url endpoint', () => {
+      mozEndpoint.endpoint = 'url-metrics';
+      mozEndpoint.bitFlagsMapping = {
+        cols: 'url-metrics',
+        sourceCols: 'url-metrics',
+        targetCols: 'url-metrics',
+        linkCols: 'url-metrics'
+      };
+
+      var params = {
+        cols: ['Title', 'Domain Authority'],
+        limit: 35
+      }
+
+      var time = new Date(1330688329321);
+      tk.freeze(time);
+
+      var expectedUrl = 'http://lsapi.seomoz.com/linkscape/url-metrics/?Cols=68719476737&Limit=35&';
+
+      var expires = Math.floor((Date.now() / 1000)) + 300;
+      var stringToSign = credentials.accessId + '\n' + expires;
+      var signature = crypto.createHmac('sha1', credentials.secretKey).update(stringToSign).digest('base64');
+
+      expectedUrl += 'AccessID=' + credentials.accessId + '&';
+      expectedUrl += 'Expires=' + expires + '&'; 
+      expectedUrl += 'Signature=' + encodeURIComponent(signature);
+
+      expect(mozEndpoint._buildUrl(params)).to.equal(expectedUrl)
+
+      tk.reset();
+    });
+  })
+
+  describe('get', () => {
+    var mozEndpoint = new MozEndpoint(moz);
+    mozEndpoint.endpoint = 'url-metrics';
+    mozEndpoint.bitFlagsMapping = {
+      cols: 'url-metrics',
+      sourceCols: 'url-metrics',
+      targetCols: 'url-metrics',
+      linkCols: 'url-metrics'
+    };
+
+    it('fetches endpoint correctly', () => {      
+      var params = {
+        cols: ['Title', 'Domain Authority'],
+        limit: 35
+      }
+
+      expect(mozEndpoint.get('www.moz.com', params)).to.be.fulfilled;
+    })
+  })
+
+  describe('post', () => {
+    var mozEndpoint = new MozEndpoint(moz);
+    mozEndpoint.endpoint = 'url-metrics';
+    mozEndpoint.bitFlagsMapping = {
+      cols: 'url-metrics',
+      sourceCols: 'url-metrics',
+      targetCols: 'url-metrics',
+      linkCols: 'url-metrics'
+    };
+
+    it('fetches endpoint correctly', () => {      
+      var params = {
+        cols: ['Title', 'Domain Authority'],
+        limit: 35
+      }
+
+      expect(mozEndpoint.post(['www.moz.com', 'google.com'], params)).to.be.fulfilled;
+    })
   })
 
 });
