@@ -36,7 +36,7 @@
     "eslint": "^6.1.0",
     "eslint-config-airbnb": "^17.1.1",
     "istanbul": "^0.4.5",
-    "mocha": "^6.2.0",
+    "mocha": "^10.2.0",
     "nyc": "^14.1.1",
     "timekeeper": "^2.2.0"
   },
